@@ -1,0 +1,3 @@
+#!/bin/sh
+
+mplayer -geometry 600x800+200-0 tv:// -tv driver=v4l2:device=/dev/video1:width=800:height=600 -vf rotate=1 $*

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+declare -A SEEN
+
+fixtag() {
+    IMG=$1
+    exiftool -P '-FileModifyDate>DateTimeOriginal' -if 'not $DateTimeOriginal' $IMG
+}
+
+fixname() {
+    exiftool '-DateTimeOriginal>FileName' -d 'img-%Y%m%d-%H%M%S%%-c.%%e' $1
+}
+
+while true
+do
+    SLEEP=2
+    for img in $(find . -maxdepth 1 -regex '.*\.\(jpg\|png\)' '!' -newermt -5sec )
+    do
+      [ -z ${SEEN["$img"]} ] || continue;
+      SEEN["$img"]="$img"
+      echo $img
+      if [[ $img == ./Image-*.jpg ]]
+      then
+        fixtag $img
+        fixname $img
+        SLEEP=0
+        continue
+      fi
+      bin/arcp $img
+    done
+    sleep $SLEEP
+done
+
