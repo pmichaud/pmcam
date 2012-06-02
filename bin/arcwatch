@@ -19,7 +19,7 @@ do
       [ -z ${SEEN["$img"]} ] || continue;
       SEEN["$img"]="$img"
       echo $img
-      if [[ $img == ./Image-*.jpg ]]
+      if [[ $img == ./Image-*.png ]]
       then
         fixtag $img
         fixname $img
