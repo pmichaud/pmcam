@@ -1,0 +1,34 @@
+#!/bin/bash
+
+export PHOTO_HOME=${PHOTO_HOME:-/zip/photo}
+export VIDEO_HOME=${VIDEO_HOME:-/av/video}
+
+arcphoto () {
+    IMG=$1
+    IMGDATE=$(exiftool -p '$DateTimeOriginal' -d '%Y-%m-%d' $IMG)
+    IMGYEAR=$(exiftool -p '$DateTimeOriginal' -d '%Y' $IMG)
+    [ -z "$IMGDATE" ] && return 1
+    DESTDIR="$PHOTO_HOME/$IMGYEAR/$IMGDATE"
+    [[ $(exiftool -p '$MIMEType' $IMG) == video* ]] && 
+        DESTDIR="$VIDEO_HOME/$IMGDATE"
+    mkdir -p $DESTDIR
+    BASENAME=$(basename $IMG | tr A-Z a-z)
+    DESTFILE="$DESTDIR/$BASENAME"
+    [[ $BASENAME == [0-9][0-9][0-9][0-9][0-9].mts ]] &&
+        DESTFILE="$DESTDIR/$IMGDATE-$BASENAME"
+    [ $IMG -ef $DESTFILE ] && return 0
+    if cmp -s $IMG DESTFILE
+    then 
+      echo rm -f $IMG
+      rm -f $IMG
+    elif [ -d $DESTDIR ]
+    then
+      echo mv -iu $IMG $DESTFILE
+      mv -iu $IMG $DESTFILE
+    fi
+}
+
+for f in "$@"
+do
+  arcphoto $f
+done
